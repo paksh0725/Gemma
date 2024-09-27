@@ -17,12 +17,8 @@ from datetime import datetime
 
 # 환경 변수 로드
 load_dotenv()
-openai_api_key = os.getenv('OPENAI_API_KEY')
+gemmaAPI = os.getenv('gemma_API')
 
-if not openai_api_key:
-    raise ValueError("OpenAI API 키가 설정되지 않았습니다. .env 파일에 'OPENAI_API_KEY'를 추가해주세요.")
-else:
-    openai.api_key = openai_api_key
 
 class ExcelMarkdownJSONConverter:
     def __init__(self, data_dir='./data', json_file_path='./output_report.json'):
@@ -161,11 +157,11 @@ class ExcelMarkdownJSONConverter:
 
     def generate_analysis_report(self, selected_sheet_name, similar_sheets, max_tokens=1500):
         """
-        GPT를 사용하여 분석 보고서를 생성합니다.
+        gemma를 사용하여 분석 보고서를 생성합니다.
 
         :param selected_sheet_name: 사용자가 선택한 시트 이름
         :param similar_sheets: 유사한 시트들의 리스트
-        :param max_tokens: GPT 응답의 최대 토큰 수
+        :param max_tokens: 응답의 최대 토큰 수
         :return: 생성된 분석 보고서 문자열
         """
         # 선택된 시트의 내용을 가져오기
@@ -181,7 +177,7 @@ class ExcelMarkdownJSONConverter:
                 "내용": sheet['Markdown 내용']
             })
 
-        # GPT에게 보낼 프롬프트 작성
+        # gemma에게 보낼 프롬프트 작성
         prompt = f"""
 사용자가 선택한 시트 '{selected_sheet_name}'
 
@@ -200,8 +196,8 @@ class ExcelMarkdownJSONConverter:
 """
 
         try:
-            response = openai.chat.completions.create(
-                model="gpt-4o",
+            response = gemma.chat.completions.create(
+                model="",
                 messages=[
                     {
                         "role": "system",
@@ -237,20 +233,20 @@ class ExcelMarkdownJSONConverter:
             return answer
 
         except Exception as e:
-            print(f"[Error] GPT를 사용하여 분석 보고서를 생성하는 중 오류가 발생했습니다: {e}")
+            print(f"[Error] 분석 보고서를 생성하는 중 오류가 발생했습니다: {e}")
             return ""
             
     def generate_report2(self, report, max_tokens=1500):
         """
-        GPT를 사용하여 보고서를 Markdown 형식으로 정리합니다.
+        gemma를 사용하여 보고서를 Markdown 형식으로 정리합니다.
 
         :param report: 기존 보고서 내용
-        :param max_tokens: GPT 응답의 최대 토큰 수
+        :param max_tokens: gemma 응답의 최대 토큰 수
         :return: 정리된 보고서 문자열
         """
         try:
-            response = openai.chat.completions.create(
-                model="gpt-4o",
+            response = gemma.chat.completions.create(
+                model="",
                 messages=[
                     {
                         "role": "system",
@@ -279,7 +275,7 @@ class ExcelMarkdownJSONConverter:
             answer = response.choices[0].message.content
             return answer
         except Exception as e:
-            print(f"[Error] GPT를 사용하여 보고서를 정리하는 중 오류가 발생했습니다: {e}")
+            print(f"[Error] 보고서를 정리하는 중 오류가 발생했습니다: {e}")
             return ""
 
     def parse_markdown_to_docx(self, markdown_content, query):
@@ -548,7 +544,7 @@ def search_similar(selected_sheet, converter: ExcelMarkdownJSONConverter):
 
 def generate_report(selected_sheet, similar_sheets, converter: ExcelMarkdownJSONConverter):
     """
-    GPT를 사용하여 분석 보고서를 생성합니다.
+    gemma를 사용하여 분석 보고서를 생성합니다.
     """
     if not converter or not converter.json_data:
         return "", "JSON 데이터가 로드되지 않았습니다."
@@ -573,7 +569,7 @@ def download_report(report_text, converter: ExcelMarkdownJSONConverter, selected
 
 # Gradio 인터페이스 구성
 with gr.Blocks() as demo:
-    gr.Markdown("## Excel Markdown JSON Converter with GPT Analysis")
+    gr.Markdown("## Excel Markdown JSON Converter with gemma Analysis")
 
     # 초기화 및 JSON 생성
     converter = ExcelMarkdownJSONConverter()
